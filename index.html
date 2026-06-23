@@ -1,0 +1,196 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>WallStreetBets Magic 8-Ball</title>
+<style>
+  :root { color-scheme: dark; }
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+  html, body {
+    height: 100%;
+    background: #000;
+    overflow: hidden;
+    font-family: "Arial Black", Arial, Helvetica, sans-serif;
+  }
+  body {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+
+  /* Wrapper keeps the image's 1376x768 aspect ratio and is the positioning
+     context + container for the overlaid phrase. */
+  .stage {
+    position: relative;
+    aspect-ratio: 1376 / 768;
+    width: 100vw;
+    max-width: 177.78vh; /* 1376/768 * 100vh -> letterbox instead of crop */
+    container-type: inline-size;
+    cursor: pointer;
+    user-select: none;
+    -webkit-tap-highlight-color: transparent;
+  }
+  .stage img {
+    display: block;
+    width: 100%;
+    height: 100%;
+    object-fit: contain;
+  }
+
+  /* The white answer card sits exactly over the ball's center window. */
+  .phrase {
+    position: absolute;
+    left: 51.2%;
+    top: 48.4%;
+    transform: translate(-50%, -50%);
+    width: 12.8cqw;
+    aspect-ratio: 1 / 1;
+    background: #f3f4f6;
+    border-radius: 6%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    text-align: center;
+    padding: 1cqw;
+    color: #0c1f4a;
+    font-size: 1.55cqw; /* fallback; JS auto-fits per phrase */
+    line-height: 1.1;
+    letter-spacing: 0;
+    overflow-wrap: normal;
+    word-break: normal;
+    text-transform: uppercase;
+    box-shadow: 0 0 1.2cqw rgba(40,90,220,0.55);
+    transition: opacity 0.18s ease, filter 0.18s ease, transform 0.18s ease;
+  }
+  .phrase.fading {
+    opacity: 0;
+    filter: blur(6px);
+    transform: translate(-50%, -50%) scale(0.8);
+  }
+
+  /* Soft pulsing hint over the hand so the user knows where to press. */
+  .hint {
+    position: absolute;
+    left: 21%;
+    bottom: 6%;
+    transform: translateX(-50%);
+    background: rgba(0,0,0,0.55);
+    color: #ffd84d;
+    font-size: 1.4cqw;
+    padding: 0.6cqw 1.1cqw;
+    border-radius: 999px;
+    pointer-events: none;
+    white-space: nowrap;
+    animation: bob 1.6s ease-in-out infinite;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+  }
+  @keyframes bob {
+    0%, 100% { transform: translateX(-50%) translateY(0); opacity: 0.85; }
+    50%      { transform: translateX(-50%) translateY(-6px); opacity: 1; }
+  }
+
+  .stage.shaking img { animation: shake 0.35s ease; }
+  @keyframes shake {
+    0%, 100% { transform: translate(0,0) rotate(0); }
+    20% { transform: translate(-1.2%, 0.6%) rotate(-1.2deg); }
+    40% { transform: translate(1.2%, -0.6%) rotate(1.2deg); }
+    60% { transform: translate(-0.9%, -0.4%) rotate(-0.8deg); }
+    80% { transform: translate(0.9%, 0.4%) rotate(0.8deg); }
+  }
+</style>
+</head>
+<body>
+  <div class="stage" id="stage" title="Press the hand to shake">
+    <img src="background.jpg" alt="WallStreetBets magic 8-ball" />
+    <div class="phrase" id="phrase">Ask wife's boyfriend</div>
+    <div class="hint">👆 Tap to shake</div>
+  </div>
+
+  <script>
+    const PHRASES = [
+      "To the moon!",
+      "YOLO",
+      "Stonks only go up",
+      "Buy the dip",
+      "Tendies incoming",
+      "Calls will print",
+      "Diamond hands",
+      "Apes strong together",
+      "GUH",
+      "Margin call",
+      "Priced in",
+      "Bagholder confirmed",
+      "Paper hands",
+      "Puts will print",
+      "Theta gang wins",
+      "Ask wife's boyfriend",
+      "Sir, this is a Wendy's",
+      "Market manipulation",
+      "Inverse Cramer",
+      "Check Robinhood later",
+      "Wendy's Parking Lot"
+    ];
+
+    const stage = document.getElementById("stage");
+    const phraseEl = document.getElementById("phrase");
+    let last = "Ask wife's boyfriend";
+    let busy = false;
+
+    // Shrink the font until the (longest) word fits the card — no letters
+    // spill outside the box, and short phrases still render nice and big.
+    function fitText() {
+      const w = stage.clientWidth;
+      if (!w) return;
+      const max = w * 0.017;   // ~1.7cqw ceiling
+      const min = w * 0.009;   // floor so it never gets unreadably tiny
+      let fs = max;
+      phraseEl.style.fontSize = fs + "px";
+      while (fs > min &&
+             (phraseEl.scrollWidth > phraseEl.clientWidth ||
+              phraseEl.scrollHeight > phraseEl.clientHeight)) {
+        fs -= 0.5;
+        phraseEl.style.fontSize = fs + "px";
+      }
+    }
+
+    function pick() {
+      let next;
+      do { next = PHRASES[Math.floor(Math.random() * PHRASES.length)]; }
+      while (next === last && PHRASES.length > 1);
+      last = next;
+      return next;
+    }
+
+    function shake() {
+      if (busy) return;
+      busy = true;
+
+      stage.classList.add("shaking");
+      phraseEl.classList.add("fading");
+
+      setTimeout(() => {
+        phraseEl.textContent = pick();
+        fitText();
+        phraseEl.classList.remove("fading");
+      }, 200);
+
+      setTimeout(() => {
+        stage.classList.remove("shaking");
+        busy = false;
+      }, 380);
+    }
+
+    stage.addEventListener("click", shake);
+    document.addEventListener("keydown", (e) => {
+      if (e.code === "Space" || e.code === "Enter") { e.preventDefault(); shake(); }
+    });
+
+    // Keep the text fitted on first paint and whenever the page resizes.
+    window.addEventListener("resize", fitText);
+    if (document.fonts && document.fonts.ready) document.fonts.ready.then(fitText);
+    fitText();
+  </script>
+</body>
+</html>
