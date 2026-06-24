@@ -46,8 +46,8 @@
     transform: translate(-50%, -50%);
     width: 12.8cqw;
     aspect-ratio: 1 / 1;
-    background: #f3f4f6;
-    border-radius: 6%;
+    background: radial-gradient(circle at 50% 45%, #ffffff 52%, #eef3ff 100%);
+    border-radius: 9%;
     display: flex;
     align-items: center;
     justify-content: center;
@@ -60,7 +60,11 @@
     overflow-wrap: normal;
     word-break: normal;
     text-transform: uppercase;
-    box-shadow: 0 0 1.2cqw rgba(40,90,220,0.55);
+    box-shadow:
+      0 0 0.5cqw 0.25cqw rgba(255,255,255,0.85),
+      0 0 2.4cqw 0.4cqw rgba(130,175,255,0.7),
+      0 0 5cqw 1cqw rgba(45,95,225,0.5),
+      0 0 9cqw 2cqw rgba(25,65,190,0.32);
     transition: opacity 0.18s ease, filter 0.18s ease, transform 0.18s ease;
   }
   .phrase.fading {
