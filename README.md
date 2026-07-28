@@ -6,7 +6,7 @@ A free online **Magic 8-Ball for WallStreetBets degens**. Tap the ball to shake 
 
 No ads. No tracking. No signup. Nothing for sale. Just a fidget toy.
 
-![WSB Magic 8-Ball](og-image.png)
+![WSB Magic 8-Ball demo — tap to shake for a new answer](demo.gif)
 
 ## Features
 
