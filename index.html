@@ -183,7 +183,11 @@
 
     const stage = document.getElementById("stage");
     const phraseEl = document.getElementById("phrase");
-    let last = "Ask wife's boyfriend";
+    // Rolling "taboo" window: never repeat any of the last RECENT_K answers.
+    // Pure uniform sampling clumps (birthday paradox) — with 27 phrases, ~45%
+    // of 10-tap sessions would repeat one within 3 taps, which reads as broken.
+    const RECENT_K = 4;
+    let recent = ["Ask wife's boyfriend"];
     let busy = false;
 
     // Shrink the font until the (longest) word fits the card — no letters
@@ -204,10 +208,13 @@
     }
 
     function pick() {
+      // Keep the window smaller than the bank, or the reroll never terminates.
+      const k = Math.min(RECENT_K, PHRASES.length - 1);
       let next;
       do { next = PHRASES[Math.floor(Math.random() * PHRASES.length)]; }
-      while (next === last && PHRASES.length > 1);
-      last = next;
+      while (recent.includes(next) && k > 0);
+      recent.push(next);
+      while (recent.length > k) recent.shift();
       return next;
     }
 
